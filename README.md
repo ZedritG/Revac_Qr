@@ -31,6 +31,7 @@ flutter run
 ```bash
 flutter build apk --release
 # Resultado: build/app/outputs/flutter-apk/app-release.apk
+> Usalo solo si deseas instalar la app en un dispositivo fisico propio.
 ```
 
 > Sugerencia: al ejecutar en emuladores sin camara fisica, use la opcion de emulacion de codigo de barras disponible en Android Studio o comparta la pantalla con un QR generado.
