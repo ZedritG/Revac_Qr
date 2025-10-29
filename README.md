@@ -27,6 +27,12 @@ flutter pub get
 flutter run
 ```
 
+### Generar APK de lanzamiento
+```bash
+flutter build apk --release
+# Resultado: build/app/outputs/flutter-apk/app-release.apk
+```
+
 > Sugerencia: al ejecutar en emuladores sin camara fisica, use la opcion de emulacion de codigo de barras disponible en Android Studio o comparta la pantalla con un QR generado.
 
 ## Tests y calidad
