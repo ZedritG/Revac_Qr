@@ -1,11 +1,9 @@
 name: revec_qr
-description: "A new Flutter project."
-publish_to: 'none'
+description: A new Flutter project.
+publish_to: none
 version: 0.1.0
-
 environment:
   sdk: ^3.8.1
-
 dependencies:
   flutter:
     sdk: flutter
@@ -21,13 +19,19 @@ dependencies:
   flutter_map: ^7.0.2
   latlong2: ^0.9.1
   logger: ^2.6.2
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
   build_runner: ^2.4.9
   hive_generator: ^2.0.1
-
+  flutter_launcher_icons: ^0.13.1
 flutter:
   uses-material-design: true
+flutter_launcher_icons:
+  android: launcher_icon
+  ios: true
+  image_path: assets/icons/app_icon.png
+  adaptive_icon_foreground: assets/icons/app_icon_foreground.png
+  adaptive_icon_background: '#121733'
+  min_sdk_android: 21

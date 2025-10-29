@@ -48,6 +48,7 @@ flutter test
 - **Persistencia offline:** Hive (`VisitLocalDataSource`, `SessionLocalDataSource`) + `Hive.initFlutter()` en `bootstrap`.
 - **Ruteo:** `MaterialApp` con `AppRoutes` (splash -> login -> dashboard -> scanner).
 - **Sesion persistente:** login simulado con credenciales locales, almacenamiento en Hive y restauracion automatica.
+- **Icono de la app:** Configurado con `flutter_launcher_icons` usando `assets/icons/app_icon.png` y `app_icon_foreground.png`.
 - **Observabilidad y errores:** `logger` centralizado via Riverpod (`loggerProvider`) que registra advertencias y excepciones en controladores clave.
 - **UI/UX:** Material 3, tema personalizado, overlays de escaneo, historial con busqueda, filtros y detalles ampliados.
 

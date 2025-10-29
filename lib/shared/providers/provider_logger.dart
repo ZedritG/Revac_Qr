@@ -14,8 +14,8 @@ class AppProviderObserver extends ProviderObserver {
     assert(() {
       // ignore: avoid_print
       print(
-        'Provider ${provider.name ?? provider.runtimeType} updated: '
-        '$previousValue -> $newValue',
+        'Provider \${provider.name ?? provider.runtimeType} updated: '
+        '\$previousValue -> \$newValue',
       );
       return true;
     }());
