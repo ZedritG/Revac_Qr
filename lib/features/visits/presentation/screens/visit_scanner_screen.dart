@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -29,7 +27,6 @@ class _VisitScannerScreenState extends ConsumerState<VisitScannerScreen>
   bool _scannerStarted = false;
   bool _isEnsuringPermissions = false;
   bool _isStartingScanner = false;
-  bool _locationPermissionHandled = false;
 
   @override
   void initState() {
@@ -52,7 +49,6 @@ class _VisitScannerScreenState extends ConsumerState<VisitScannerScreen>
       _scannerStarted = false;
     }
     if (state == AppLifecycleState.resumed) {
-      _locationPermissionHandled = false;
       _ensurePermissions();
     }
   }
@@ -92,9 +88,6 @@ class _VisitScannerScreenState extends ConsumerState<VisitScannerScreen>
         if (!mounted) return;
         _startScannerIfNeeded();
       });
-      if (cameraGranted && !_locationPermissionHandled) {
-        unawaited(_handleLocationPermissions());
-      }
     } finally {
       _isEnsuringPermissions = false;
     }
@@ -113,43 +106,6 @@ class _VisitScannerScreenState extends ConsumerState<VisitScannerScreen>
       debugPrint('visit_scanner: failed to start scanner - $error');
     } finally {
       _isStartingScanner = false;
-    }
-  }
-
-  Future<void> _handleLocationPermissions() async {
-    _locationPermissionHandled = true;
-    final geolocationService = ref.read(geolocationServiceProvider);
-    try {
-      await geolocationService.ensurePermissions();
-    } on LocationPermissionDeniedException {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'No podremos capturar la ubicación hasta que concedas el permiso.',
-          ),
-        ),
-      );
-    } on LocationPermissionPermanentlyDeniedException {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Permiso de ubicación denegado permanentemente. Habilítalo en ajustes.',
-          ),
-        ),
-      );
-    } on LocationServiceDisabledException {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Activa el servicio de ubicación para guardar coordenadas.',
-          ),
-        ),
-      );
-    } catch (_) {
-      // Otros errores se manejan al intentar registrar la visita.
     }
   }
 
@@ -189,6 +145,41 @@ class _VisitScannerScreenState extends ConsumerState<VisitScannerScreen>
     _scannerStarted = false;
 
     final team = TeamCatalog.infoFor(code);
+    final geolocationService = ref.read(geolocationServiceProvider);
+    try {
+      await geolocationService.ensurePermissions();
+    } on LocationPermissionDeniedException {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'No podremos capturar la ubicación hasta que concedas el permiso.',
+            ),
+          ),
+        );
+      }
+    } on LocationPermissionPermanentlyDeniedException {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Permiso de ubicación denegado permanentemente. Habilítalo en ajustes.',
+            ),
+          ),
+        );
+      }
+    } on LocationServiceDisabledException {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Activa el servicio de ubicación para guardar coordenadas.',
+            ),
+          ),
+        );
+      }
+    } catch (_) {}
+
     final confirmation = await _showConfirmationSheet(
       code: code,
       teamName: team.name,
