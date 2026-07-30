@@ -1,71 +1,158 @@
-# Revec QR
+<div align="center">
+  <img src="./docs/readme/cover.svg" width="100%" alt="Revec QR — Offline-first field visit tracking" />
+</div>
 
-Aplicacion Flutter para registro de visitas a equipos de trabajo mediante codigos QR o de barras, pensada para tecnicos de campo y supervisores. Incluye manejo de roles simulado, almacenamiento offline con Hive, captura de ubicacion y un flujo de escaneo enriquecido.
+<br />
 
-## Credenciales de prueba
+<div align="center">
+  <a href="https://github.com/ZedritG/Revac_Qr/actions/workflows/flutter-ci.yml">
+    <img alt="Flutter CI" src="https://github.com/ZedritG/Revac_Qr/actions/workflows/flutter-ci.yml/badge.svg" />
+  </a>
+  <img alt="Flutter" src="https://img.shields.io/badge/Flutter-3.24+-02569B?logo=flutter&logoColor=white" />
+  <img alt="Architecture" src="https://img.shields.io/badge/Architecture-Feature--first-6366F1" />
+  <img alt="Persistence" src="https://img.shields.io/badge/Persistence-Offline--first-16A34A" />
+</div>
 
-| Rol                      | Correo                | Password   |
-|--------------------------|-----------------------|------------|
-| Técnico (Norte)          | tecnico@revec.com     | qrtech123  |
-| Técnica (Sur)            | tecnico.sur@revec.com | qrtech456  |
-| Supervisor               | supervisor@revec.com  | qradmin123 |
+## Overview
 
-## QR de prueba
-En `docs/qr-codes/` se incluyen QR listos para escanear:
-- TM-001: ![TM-001](docs/qr-codes/TM-001.png)
-- TM-002: ![TM-002](docs/qr-codes/TM-002.png)
-- TM-003: ![TM-003](docs/qr-codes/TM-003.png)
+**Revec QR** is a Flutter application for field technicians and supervisors
+who need to register equipment visits reliably through QR or barcode scanning.
+It combines role-aware workflows, local persistence, geolocation, and visit
+history in a focused Material 3 experience.
 
-## Requisitos
-- Flutter 3.24 (SDK >= 3.8) con soporte para Material 3.
-- Dispositivo o emulador con camara funcional para probar el escaneo.
-- Permisos de ubicacion habilitados para captar coordenadas.
+The project is designed as a realistic operational prototype: it works offline,
+restores sessions locally, captures field context, and gives supervisors a
+searchable view of activity.
 
-## Ejecucion
+## Product preview
+
+<table>
+  <tr>
+    <td width="50%" align="center">
+      <img src="./docs/readme/login.png" width="100%" alt="Secure Revec QR access screen" />
+    </td>
+    <td width="50%" align="center">
+      <img src="./docs/readme/dashboard.png" width="100%" alt="Revec QR supervisor dashboard" />
+    </td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Role-aware secure access</sub></td>
+    <td align="center"><sub>Supervisor history and filters</sub></td>
+  </tr>
+</table>
+
+## What the product covers
+
+| Capability | Product value |
+| --- | --- |
+| **QR and barcode scanning** | Reduces manual entry during field visits |
+| **Offline-first persistence** | Keeps the workflow usable without reliable connectivity |
+| **Role-aware sessions** | Gives technicians and supervisors the right level of access |
+| **Location capture** | Adds geographic context to every validated visit |
+| **Visit history** | Supports search, time filters, technician filters, and detailed records |
+| **Map context** | Displays validated coordinates with OpenStreetMap |
+
+## Architecture
+
+```mermaid
+flowchart LR
+    User["Technician / Supervisor"] --> UI["Flutter · Material 3"]
+    UI --> State["Riverpod state layer"]
+    State --> Auth["Session controller"]
+    State --> Visits["Visit registration"]
+    Visits --> Scanner["QR / barcode scanner"]
+    Visits --> Geo["Geolocation"]
+    Auth --> Store[("Hive local storage")]
+    Visits --> Store
+    Visits --> Map["OpenStreetMap context"]
+```
+
+The codebase follows feature-oriented boundaries:
+
+```text
+lib/
+├── bootstrap/            # App initialization
+├── core/                 # Routing, logging and shared infrastructure
+└── features/
+    ├── auth/             # Session data, domain and presentation
+    └── visits/           # Visit data, domain and presentation
+```
+
+### Technical decisions
+
+- **Riverpod** keeps dependencies and asynchronous state explicit.
+- **Hive** supports fast local persistence and session restoration.
+- **Feature layers** separate data, domain, and presentation concerns.
+- **Centralized logging** records relevant warnings and controller failures.
+- **Material 3** provides a responsive and consistent visual foundation.
+
+## Run locally
+
+### Requirements
+
+- Flutter 3.24 or newer
+- Dart SDK compatible with `^3.8.1`
+- A device or emulator with camera support for the complete scan flow
+- Location permissions enabled for coordinate capture
+
+### Setup
+
 ```bash
 flutter pub get
 flutter run
 ```
 
-### Generar APK de lanzamiento
+For web preview:
+
 ```bash
-flutter build apk --release
-# Resultado: build/app/outputs/flutter-apk/app-release.apk
-> Usalo solo si deseas instalar la app en un dispositivo fisico propio.
+flutter run -d chrome
 ```
 
-> Sugerencia: al ejecutar en emuladores sin camara fisica, use la opcion de emulacion de codigo de barras disponible en Android Studio o comparta la pantalla con un QR generado.
+> Camera and geolocation capabilities depend on browser and device permissions.
 
-## Tests y calidad
+<details>
+<summary><strong>Local demo access</strong></summary>
+
+These credentials are local mock data intended only for the demo:
+
+| Role | Email | Password |
+| --- | --- | --- |
+| Technician — North | `tecnico@revec.com` | `qrtech123` |
+| Technician — South | `tecnico.sur@revec.com` | `qrtech456` |
+| Supervisor | `supervisor@revec.com` | `qradmin123` |
+
+Test QR images are available in [`docs/qr-codes/`](./docs/qr-codes/).
+
+</details>
+
+## Quality checks
+
 ```bash
 flutter analyze
 flutter test
+flutter build web --release
 ```
 
-## Arquitectura y decisiones principales
-- **Estado y dependencias:** Riverpod 2.6 con `ProviderScope`, `AsyncNotifier` y overrides por feature.
-- **Capas por dominio:** `features/auth` (sesion simulada), `features/visits` (visitas) divididas en `data/domain/presentation`.
-- **Persistencia offline:** Hive (`VisitLocalDataSource`, `SessionLocalDataSource`) + `Hive.initFlutter()` en `bootstrap`.
-- **Ruteo:** `MaterialApp` con `AppRoutes` (splash -> login -> dashboard -> scanner).
-- **Sesion persistente:** login simulado con credenciales locales, almacenamiento en Hive y restauracion automatica.
-- **Icono de la app:** Configurado con `flutter_launcher_icons` usando `assets/icons/app_icon.png` y `app_icon_foreground.png`.
-- **Observabilidad y errores:** `logger` centralizado via Riverpod (`loggerProvider`) que registra advertencias y excepciones en controladores clave.
-- **UI/UX:** Material 3, tema personalizado, overlays de escaneo, historial con busqueda, filtros y detalles ampliados.
+The current test suite covers session behavior and visit registration logic.
+GitHub Actions repeats analysis, tests, and a web build for every pull request.
 
-## Funcionalidades implementadas
-- Seleccion de rol mediante login simulado y sesion persistente (tecnico / supervisor).
-- Registro de visitas con flujo de escaneo (mobile_scanner), manejo de permisos de camara y geolocalizacion (geolocator + permission_handler).
-- Almacenamiento offline de visitas (Hive) con nota opcional, fecha/hora y coordenadas.
-- Historial con filtros por periodo (hoy, ultimos 7 dias), filtro por tecnico (supervisor), barra de busqueda y detalles expandibles.
-- Mapa embebido (flutter_map + OpenStreetMap) en el detalle de visita cuando existen coordenadas validas.
-- Observador Riverpod (`AppProviderObserver`) para trazabilidad durante desarrollo.
-- Pruebas unitarias basicas (`session_controller_test`, `visit_registration_controller_test`).
+## Current limitations
 
-## Limitaciones y mejoras futuras
-- Exportacion/backup de visitas a formatos externos.
-- Manejo de multiples fotografias o adjuntos por visita.
-- Internacionalizacion de textos y soporte completo para modo oscuro.
-- Envio de logs a un servicio externo (actualmente se registran localmente).
+- Local/mock authentication instead of a production identity provider
+- Local-only visit storage without remote synchronization
+- No attachment or multi-photo workflow yet
+- Spanish-only product copy
+- Dark mode and accessibility can be expanded further
 
-## Tiempo estimado dedicado
-- Aproximadamente 12 horas efectivas (distribuidas en analisis, implementacion, estilos y pruebas).
+## Roadmap
+
+- Remote synchronization and conflict resolution
+- Export and backup workflows
+- Multiple photo attachments per visit
+- Internationalization
+- Production authentication and audit trail
+
+---
+
+Built by [Ronald Rodríguez](https://github.com/ZedritG) as a product engineering
+case study covering field UX, offline data, mobile architecture, and validation.

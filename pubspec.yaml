@@ -1,5 +1,5 @@
 name: revec_qr
-description: A new Flutter project.
+description: Offline-first field visit tracking with QR scanning and geolocation.
 publish_to: none
 version: 0.1.0
 environment:
